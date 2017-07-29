@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>		
+        <title>Youtube Audio Stream</title>
+        <meta charset="UTF-8" />					
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Awesome videos!" />
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+	<script>
+		
+		function httpGet(theUrl)
+		{
+			var xmlHttp = new XMLHttpRequest();
+			xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+			xmlHttp.send( null );
+			return xmlHttp.responseText;
+		}
+		function removeplayer()
+		{
+			document.getElementById("results").removeChild(document.getElementById("player"));
+		}
+		function createplayer(URL)
+		{
+			var mp = document.createElement("AUDIO");
+			var mpatt = document.createAttribute("id");
+			mpatt.value = "player";
+			var mpatt2 = document.createAttribute("controls");
+			mpatt2.value = "controls";
+			mp.setAttributeNode(mpatt);
+			mp.setAttributeNode(mpatt2);
+			document.getElementById("results").appendChild(mp);
+			var sour = document.createElement("SOURCE");
+			var att = document.createAttribute("src");
+			att.value = URL;
+			var att2 = document.createAttribute("type");
+			att2.value = "audio/mpeg";
+			var attid = document.createAttribute("id");
+			attid.value = "sour";
+			sour.setAttributeNode(attid);
+			sour.setAttributeNode(att);
+			sour.setAttributeNode(att2);
+			document.getElementById("player").appendChild(sour);
+
+		}
+		function dosearch()
+		{	
+		
+			var b = document.getElementById('search').value;
+			b = b.replace(/\s/g, "+");
+			var a = httpGet("https://www.googleapis.com/youtube/v3/search?q="+b+"&key=AIzaSyCVbBmptMPc51isKBQEFQe8c4rQmS0WpzE&part=snippet");
+			a=JSON.parse(a);
+			//var count=0;
+			automate(a);
+		}
+		function automate(a)
+		{	
+			//var count=incr();
+			var c = httpGet("https://www.youtubeinmp3.com/fetch/?format=JSON&video=http://www.youtube.com/watch?v="+a.items[incr()].id.videoId);
+			removeplayer();
+			c=JSON.parse(c);
+			createplayer(c.link);
+			document.getElementById("player").play();
+			var aud = document.getElementById("player");
+			aud.onended = function() {
+   		    	//document.getElementById("demo").innerHTML = count;
+   		    	automate(a);
+            }
+			
+
+		}
+		var incr = (function () {
+    	  	var i = 0;
+
+   			return function () {
+        	return i++;
+   			}
+		})();
+	</script>
+    <body>
+        <header>
+            <h1 class="w100 text-center"><a href="index.html">YouTube Audio Stream</a></h1>
+        </header>
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <form action="#">
+                    <p><input type="text" id="search" placeholder="Type the name of the song..." autocomplete="on" class="form-control" /></p>
+                    <p><input type="submit" value="Load & Play" class="form-control btn btn-primary w100" onclick = dosearch()></p>
+                </form>
+                <div id="results" class ="w100 text-center">
+					<audio id = "player" controls = "controls">
+					</audio>
+				</div>
+            </div>
+        </div>
+    </body>
+</html>
